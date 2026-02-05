@@ -83,10 +83,11 @@ When paired = TRUE, the function creates a table with two columns called 'com_gr
 | pat1-Tcell_conditionA | Tcell_conditionA | pat5       |
 | pat1-Tcell_conditionB | Tcell_conditionB | pat5       |
 
-In case paired = FALSE, the 'pair_group' column is not created and the comparison is only made based on the 'com_group' column.
+In case `paired = FALSE`, the 'pair_group' column is not created and the comparison is only made based on the 'com_group' column.
 
-```{r example}
+```{r example, eval=FALSE}
 library(pseuDE2)
+
 pseude_res <- pseuDE2(sr,
 aggregate_groups_metadata = 'Patients',
 compare_group_metadata = 'cellType_condition',
