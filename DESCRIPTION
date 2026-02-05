@@ -1,0 +1,10 @@
+Package: pseuDE2
+Title: Pseudobulk differential expression analysis for single cell RNA.
+Version: 2.1
+Authors@R: 
+    person("Gregory", "van Beek", , "g.vanbeek@erasmusmc.nl", role = c("aut", "cre"))
+Description: Pseudobulk differential expression analysis using DESeq2 for single cell RNA in Seurat. It allows for paired analysis.
+License: `use_gpl3_license()`
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
