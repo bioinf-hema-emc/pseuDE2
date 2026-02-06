@@ -62,7 +62,9 @@
 #'
 #' EXAMPLE
 #'
-#' We want to compare conditionA with conditionB in T-cells using 5 patients.
+#' We have a Seurat object with cells from two conditions (A and B).
+#' For 5 patients single cell sequencing is performed in both conditions.
+#' We want to compare condition A with condition B in T-cells using 5 patients.
 #' There are two approaches we can take.
 #'
 #' Approach 1:
@@ -100,6 +102,11 @@
 #'
 #' @examples
 #' \dontrun{
+#'
+#' library(pseuDE2)
+#' library(Seurat)
+#' library(EnhancedVolcano)
+#'
 #' pseude_res <- pseuDE2(sr,
 #' aggregate_groups_metadata = 'Patients',
 #' compare_group_metadata = 'cellType_condition',

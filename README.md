@@ -37,13 +37,17 @@ same samples are sequenced between conditions. The between sample
 variability can then be accounted for when performing the differential
 expression analysis between conditions.
 
-Design equations: \* Unpaired analysis: ‘~ + com_group’ \* Paired
-analysis: ‘~ + pair_group + com_group’ }
+Design equations:
+
+- Unpaired analysis: ‘~ + com_group’
+- Paired analysis: ‘~ + pair_group + com_group’
 
 ## Example
 
-We want to compare conditionA with conditionB in T-cells using 5
-patients. There are two approaches we can take.
+We have a Seurat object with cells from two conditions (A and B). For 5
+patients single cell sequencing is performed in both conditions. We want
+to compare condition A with condition B in T-cells using 5 patients.
+There are two approaches we can take.
 
 Approach 1:
 
@@ -53,8 +57,9 @@ cell, something like cellType_condition (e.g. Tcell_conditionA;
 Tcell_conditionB, neutrophil_conditionA, etc.). This allows us to tell
 the function to compare conditionA with conditionB only for the T-cells.
 This new metadata entry is going to be our choice for
-‘compare_groups_metadata’ together with comp_group1 = ‘Tcell_conditionA’
-and comp_group2 = ‘Tcell_conditionB’.
+`compare_groups_metadata` together with
+`comp_group1 = 'Tcell_conditionA'` and
+`comp_group2 = 'Tcell_conditionB'`.
 
 Approach 2:
 
@@ -67,11 +72,11 @@ new metadata entry. The entry for ‘compare_groups_metadata’ is now
 
 For either approach, the metadata that defines the patients is going to
 be our entry for ‘aggregate_groups_metadata’. Since the same patients
-are present in both conditionA and conditionB, when can perform a paired
-comparison by setting paired = T. This corrects for any biological
-variability wihin the patients between the conditions. When paired =
-TRUE, the function creates a table with two columns called ‘com_group’
-and ‘pair_group’:
+are present in both condition A and condition B, when can perform a
+paired comparison by setting `paired = T`. This corrects for any
+biological variability within the patients between the conditions. When
+`paired = TRUE`, the function creates a table with two columns called
+‘com_group’ and ‘pair_group’:
 
 |                       | com_group        | pair_group |
 |-----------------------|------------------|------------|
@@ -91,8 +96,10 @@ comparison is only made based on the ‘com_group’ column.
 
 ``` r
 library(pseuDE2)
+library(Seurat)
+library(EnhancedVolcano)
 
-pseude_res <- pseuDE2(sr,
+pseude_res <- pseuDE2(seurat_object,
 aggregate_groups_metadata = 'Patients',
 compare_group_metadata = 'cellType_condition',
 outputDir = 'output/',
@@ -122,15 +129,15 @@ EnhancedVolcano(res_counts,
 )
 
 # CREATE FEATUREPLOTS ----
-DimPlot(sr,
+DimPlot(seurat_object,
         reduction = 'umap',
         group.by = 'Patients',
         raster = F) +
-    DimPlot(sr,
+    DimPlot(seurat_object,
             reduction = 'umap',
             group.by = 'cellType_condition',
             raster = F) +
-    FeaturePlot(sr,
+    FeaturePlot(seurat_object,
                 features = head(rownames(deg_table), 5),
                 raster = F,
                 order = T)
