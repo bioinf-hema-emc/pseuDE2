@@ -143,7 +143,7 @@ de_out <- pseude_res[[2]] # DESeq2 object
 # CREATE VOLCANOPLOT ----
 EnhancedVolcano(res_counts,
                 rownames(res_counts),
-                x ="Log2FoldChange",
+                x ="log2FoldChange",
                 y ="padj",
                 drawConnectors = TRUE,
                 cutoffLineWidth = 0.3,

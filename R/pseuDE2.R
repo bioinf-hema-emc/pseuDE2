@@ -118,11 +118,11 @@
 #'
 #' res_counts <- pseude_res[[1]] # Table with log2FC, p-values and normalized counts.
 #' de_out <- pseude_res[[2]] # DESeq2 object
-#' 
+#'
 #' # CREATE VOLCANOPLOT ----
 #' EnhancedVolcano(res_counts,
 #'                 rownames(res_counts),
-#'                 x ="Log2FoldChange",
+#'                 x ="log2FoldChange",
 #'                 y ="padj",
 #'                 drawConnectors = TRUE,
 #'                 cutoffLineWidth = 0.3,
@@ -166,99 +166,99 @@ pseuDE2 <- function(object,
                     return_results = T,
                     saveName = NULL,
                     cores = 1){
-    
+
     # INITIAL CHECKS
     if(! isS4(object) ) {
         stop('Object should be a Seurat object.')
     }
-    
+
     if(! is.character(aggregate_groups_metadata) | ! aggregate_groups_metadata %in% colnames(object@meta.data) ) {
         stop('aggregate_groups_metadata should be the name of a metadata entry in object')
     }
-    
+
     if(! is.character(compare_groups_metadata) | ! compare_groups_metadata %in% colnames(object@meta.data) ) {
         stop('compare_groups_metadata should be the name of a metadata entry in object')
     }
-    
+
     if( ! dir.exists(outputDir) ) {
         writeLines(paste0('WARNING: outputDir does not exist.\nCreating following directory: ', outputDir))
         dir.create(outputDir)
     }
-    
+
     if(! comp_group1 %in% object@meta.data[[compare_groups_metadata]] ) {
         stop('comp_group1 not found in compare_groups_metadata. Please enter a value that is present in compare_groups_metadata.')
     }
-    
+
     if(! is.null(comp_group2) ) {
         if(! comp_group2 %in% object@meta.data[[compare_groups_metadata]] ) {
             stop('comp_group2 not found in compare_groups_metadata. Please enter a value that is present in compare_groups_metadata.')
         }
     }
-    
+
     if(! is.logical(do_prefilter) ) {
         stop('do_prefilter should be TRUE (T) or FALSE (F).')
     }
-    
+
     if(! is.logical(paired) ) {
         stop('paired should be TRUE (T) or FALSE (F).')
     }
-    
+
     if ( pct > 1.0 | pct < 0.0 | ! is.numeric(pct)) {
         stop('pct requires a numeric value between 0.0 and 1.0 or NULL.')
     }
-    
+
     if (! order_results %in% c("padj", "log2FoldChange", "pvalue", "baseMean", "lfcSE") ) {
         writeLines("WARNING: order_results should one of 'padj', 'log2FoldChange', 'pvalue', 'baseMean' or 'lfcSE'.\nResetting order_results = 'padj'")
         order_results <- 'padj'
     }
-    
+
     if(! is.logical(saverds) ) {
         stop('saverds should be TRUE (T) or FALSE (F).')
     }
-    
+
     if(! is.logical(return_results) ) {
         stop('return_results should be TRUE (T) or FALSE (F)')
     }
-    
+
     if(! is.character(saveName) & ! is.null(saveName) ) {
         stop('saveName should be NULL or a character string.')
     }
-    
+
     if(! is.numeric(cores) | cores < 1) {
         stop('cores should be a positive integer value')
     }
-    
+
     if( length(grep('-', object@meta.data[[compare_groups_metadata]])) != 0 ){
         object@meta.data[[compare_groups_metadata]] <- stringr::str_replace(object@meta.data[[compare_groups_metadata]], '-', '_')
         comp_group1 <- stringr::str_replace(comp_group1, '-', '_')
         comp_group2 <- stringr::str_replace(comp_group2, '-', '_')
     }
-    
+
     if( length(grep('-', object@meta.data[[aggregate_groups_metadata]])) != 0 ){
         object@meta.data[[aggregate_groups_metadata]] <- stringr::str_replace(object@meta.data[[aggregate_groups_metadata]], '-', '_')
     }
-    
-    
+
+
     # SETUP ENVIRONMENT
     writeLines('Loading Seurat and DESeq2 packages.')
     require(Seurat)
     require(DESeq2)
-    
-    
+
+
     if( cores != 1 ) {
         cores <- BiocParallel::register(BiocParallel::MulticoreParam(cores))
     }
-    
-    
+
+
     # GET COUNTS MATRIX
     writeLines('Joining layers RNA-assay.')
     DefaultAssay(object) <- 'RNA'
     object <- JoinLayers(object)
-    
-    
+
+
     # PREPARE OBJECT
     object@meta.data[[compare_groups_metadata]] <- as.character(object@meta.data[[compare_groups_metadata]])
-    
+
     if ( length(unique(object@meta.data[[compare_groups_metadata]])) > 2 ) { # If there are more than two different values in compare_groups_metadata
         if (! is.null(comp_group2) | ! all(is.na(comp_group2)) ) {
             cells_use <- rownames(object@meta.data)[object@meta.data[[compare_groups_metadata]] == comp_group1 | object@meta.data[[compare_groups_metadata]]  == comp_group2]
@@ -275,58 +275,58 @@ pseuDE2 <- function(object,
     } else {
         stop(paste0('There are too few values in ', compare_groups_metadata, '. Ensure there are at least two values to compare.'))
     }
-    
-    
+
+
     # GET COUNTS MATRIX
     sc_counts <- object@assays[['RNA']]@layers[['counts']]
-    
+
     if (class(sc_counts)[1] != "dgCMatrix") {
         sc_counts <- Matrix::Matrix(as.matrix(sc_counts), sparse = TRUE)
     }
-    
+
     colnames(sc_counts) <- colnames(object)
     rownames(sc_counts) <- rownames(object)
-    
-    
+
+
     # DEFINE GROUPS TO COMPARE
     compare_groups <- unique(object@meta.data[[compare_groups_metadata]]) # Should be exactly two names
     compare_groups <- compare_groups[! is.na(compare_groups)]
-    
-    
+
+
     # CREATE AGGREGATION DATAFRAME
     agg_df <- data.frame('agg_comp' = paste0(object@meta.data[[aggregate_groups_metadata]], '-', object@meta.data[[compare_groups_metadata]]),
                          'com_group' = object@meta.data[[compare_groups_metadata]],
                          'agg_group' = object@meta.data[[aggregate_groups_metadata]],
                          row.names = rownames(object@meta.data))
-    
-    
+
+
     # REMOVE GENE IT IT HAS EXPRESSION IN LESS THAN PCT PERCENTAGE OF CELLS IN EITHER COMPARE_GROUPS
     if(! is.null(pct) & pct != 0.0 ) {
         writeLines(paste0('Removing genes that are expressed in less than ', pct * 100, ' percent of cells in either group.'))
         pct_genes_group1 <- Matrix::rowSums(sc_counts[, rownames(agg_df)[agg_df$com_group == comp_group1]] > 0) / dim(sc_counts[, rownames(agg_df)[agg_df$com_group == comp_group1]])[2]
         pct_genes_group2 <- Matrix::rowSums(sc_counts[, rownames(agg_df)[agg_df$com_group == comp_group2]] > 0) / dim(sc_counts[, rownames(agg_df)[agg_df$com_group == comp_group2]])[2]
         pct_genes_keep <- unique(c(names(pct_genes_group1[pct_genes_group1 > pct]), names(pct_genes_group2[pct_genes_group2 >= pct]))) #Keep genes that are expressed in more than pct of the cells.
-        
+
         writeLines(paste0(length(pct_genes_keep), ' of ',dim(sc_counts)[1] , ' genes are kept.'))
-        
+
         sc_counts <- sc_counts[pct_genes_keep,]
     }
-    
-    
+
+
     # CREATE AGGREGATE MATRIX
     writeLines('Aggregating counts matrix.')
     agg_form <- stats::as.formula('~ 0 + agg_comp') # Intersect is not important for aggregation. Removed with '0'.
-    
+
     agg_map <- Matrix::sparse.model.matrix(agg_form, agg_df, row.names = FALSE)
     colnames(agg_map) <- sub("^agg_comp", "", colnames(agg_map))
-    
+
     agg_counts = sc_counts %*% agg_map
     rownames(agg_counts) <- rownames(sc_counts)
-    
+
     writeLines('Rounding counts values to make it compatible with DESeq2.')
     agg_counts <- round(agg_counts)
-    
-    
+
+
     # CREATE COLDATA ENTRY FOR DESEQ2
     if(paired){
         pair_group <- unlist(lapply(stringr::str_split(colnames(agg_counts), '-'), '[[', 1))
@@ -334,69 +334,69 @@ pseuDE2 <- function(object,
         agg_table <- data.frame('com_group' = com_group,
                                 'pair_group' = pair_group,
                                 row.names = colnames(agg_counts))
-        
+
         Ncells <- aggregate(rep(1, nrow(agg_df)), by = list(com_group = agg_df$com_group, agg_group = agg_df$agg_group), sum)
-        
+
         design <- stats::as.formula('~ + pair_group + com_group')
     } else {
         com_group <- unlist(lapply(stringr::str_split(colnames(agg_counts), '-'), '[[', 2))
         agg_table <- data.frame('com_group' = com_group,
                                 row.names = colnames(agg_counts))
-        
+
         Ncells <- data.frame(table(agg_df$com_group))
         colnames(Ncells) <- c('com_group', 'x')
-        
+
         design <- stats::as.formula('~ + com_group')
     }
-    
-    print(Ncells)    
+
+    print(Ncells)
     if( sum(Ncells$x < 100) > 0 ) {
         writeLines('WARNING: Some groups have < 100 cells. Check reliability of results!')
     }
-    
-    
+
+
     # PERFORM DIFFERENTIAL EXPRESSION ANALYSIS
     dds <- DESeq2::DESeqDataSetFromMatrix(countData = agg_counts,
                                           colData = agg_table,
                                           design = design)
-    
+
     if (do_prefilter) { # More than half of the samples should have at least two fpm counts in at least one of the two groups.
         writeLines('Performing DESeq2 analysis with prefiltering.')
         dds_frag <- DESeq2::fpm(dds)
-        
+
         con_id1 <- grep(paste0('-', comp_group1), colnames(dds_frag))
         con_id2 <- grep(paste0('-', comp_group2), colnames(dds_frag))
         kp_gene <- rowSums(dds_frag[, con_id1] >= 2) >= round(length(con_id1) / 2) |
             rowSums(dds_frag[, con_id2] >= 2) >= round(length(con_id2) / 2)
         writeLines(paste0(table(kp_gene)[[2]], ' of ',dim(sc_counts)[1] , ' genes (', round(table(kp_gene)[[2]] / dim(sc_counts)[1] *100, digits = 2), ' percent) are kept after prefiltering.'))
-        
+
         de_out <- DESeq2::DESeq(dds[kp_gene, ], parallel = TRUE)
     } else {
         writeLines('Performing DESeq2 analysis without prefiltering.')
         de_out <- DESeq2::DESeq(dds, parallel = TRUE)
     }
-    
-    
+
+
     # GENERATE RESULTS WITH ASHR-SHRUNK LOG2FC
     writeLines('Preparing output file.')
     res <- data.frame(DESeq2::lfcShrink(de_out,
                                         contrast = c('com_group', comp_group1, comp_group2), type = "ashr",
                                         quiet = TRUE))
-    
+
     # COMPUTE NORMALIZED COUNTS
     norm_counts <- data.frame(DESeq2::counts(de_out, normalized = TRUE))
-    
+
     res_counts <- cbind(res, norm_counts)
     res_counts <- res_counts[order(res_counts[[order_results]], decreasing = F),]
-    
-    
+
+
     # SAVE RESULTS
     if(! is.null(saveName)){
         write.csv(res_counts, file = file.path(outputDir, paste0('log2fc_', saveName,'.csv')), quote = F)
     } else {
         write.csv(res_counts, file = file.path(outputDir, 'log2fc.csv'), quote = F)
     }
-    
+
     if(saverds){
         if(! is.null(saveName)){
             saveRDS(de_out, file = file.path(outputDir, paste0('DESeq2object_', saveName,'.RDS')))
@@ -404,7 +404,7 @@ pseuDE2 <- function(object,
             saveRDS(de_out, file = file.path(outputDir, 'DESeq2object.RDS'))
         }
     }
-    
+
     if(return_results){
         return(list(res_counts, de_out))
     }
