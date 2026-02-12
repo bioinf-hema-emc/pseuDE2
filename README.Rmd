@@ -81,12 +81,12 @@ When `paired = TRUE`, the function creates a table with two columns called 'com_
 | pat1-Tcell_conditionB | Tcell_conditionB | pat1       |
 | pat2-Tcell_conditionA | Tcell_conditionA | pat2       |
 | pat2-Tcell_conditionB | Tcell_conditionB | pat2       |
-| pat1-Tcell_conditionA | Tcell_conditionA | pat3       |
-| pat1-Tcell_conditionB | Tcell_conditionB | pat3       |
-| pat1-Tcell_conditionA | Tcell_conditionA | pat4       |
-| pat1-Tcell_conditionB | Tcell_conditionB | pat4       |
-| pat1-Tcell_conditionA | Tcell_conditionA | pat5       |
-| pat1-Tcell_conditionB | Tcell_conditionB | pat5       |
+| pat3-Tcell_conditionA | Tcell_conditionA | pat3       |
+| pat3-Tcell_conditionB | Tcell_conditionB | pat3       |
+| pat4-Tcell_conditionA | Tcell_conditionA | pat4       |
+| pat4-Tcell_conditionB | Tcell_conditionB | pat4       |
+| pat5-Tcell_conditionA | Tcell_conditionA | pat5       |
+| pat5-Tcell_conditionB | Tcell_conditionB | pat5       |
 
 In case `paired = FALSE`, the 'pair_group' column is not created and the comparison is only made based on the 'com_group' column.
 

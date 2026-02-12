@@ -90,12 +90,12 @@
 #'   pat1-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat1 \cr
 #'   pat2-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat2 \cr
 #'   pat2-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat2 \cr
-#'   pat1-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat3 \cr
-#'   pat1-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat3 \cr
-#'   pat1-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat4 \cr
-#'   pat1-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat4 \cr
-#'   pat1-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat5 \cr
-#'   pat1-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat5 \cr
+#'   pat3-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat3 \cr
+#'   pat3-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat3 \cr
+#'   pat4-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat4 \cr
+#'   pat4-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat4 \cr
+#'   pat5-Tcell_conditionA \tab \tab Tcell_conditionA \tab pat5 \cr
+#'   pat5-Tcell_conditionB \tab \tab Tcell_conditionB \tab pat5 \cr
 #' }
 #'
 #' In case paired = FALSE, the 'pair_group' column is not created and the comparison is only made based on the 'com_group' column.
