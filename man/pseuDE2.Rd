@@ -166,7 +166,7 @@ DimPlot(sr,
             group.by = 'cellType_condition',
             raster = F) +
     FeaturePlot(sr,
-                features = head(rownames(deg_table), 5),
+                features = head(rownames(res_counts), 5),
                 raster = F,
                 order = T)
 
