@@ -368,7 +368,11 @@ pseuDE2 <- function(object,
         con_id2 <- grep(paste0('-', comp_group2), colnames(dds_frag))
         kp_gene <- rowSums(dds_frag[, con_id1] >= 2) >= round(length(con_id1) / 2) |
             rowSums(dds_frag[, con_id2] >= 2) >= round(length(con_id2) / 2)
-        writeLines(paste0(table(kp_gene)[[2]], ' of ',dim(sc_counts)[1] , ' genes (', round(table(kp_gene)[[2]] / dim(sc_counts)[1] *100, digits = 2), ' percent) are kept after prefiltering.'))
+        if(FALSE %in% kp_gene){
+            writeLines(paste0(table(kp_gene)[[2]], ' of ',dim(sc_counts)[1] , ' genes (', round(table(kp_gene)[[2]] / dim(sc_counts)[1] *100, digits = 2), ' percent) are kept after prefiltering.'))
+        } else {
+            writeLines(paste0(table(kp_gene)[[1]], ' of ',dim(sc_counts)[1] , ' genes (100 percent) are kept after prefiltering.'))
+        }
 
         de_out <- DESeq2::DESeq(dds[kp_gene, ], parallel = TRUE)
     } else {
