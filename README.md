@@ -7,11 +7,11 @@
 
 <!-- badges: end -->
 
-Perform pseudobulk differential expression analysis for single cell RNA.
+Perform pseudobulk differential expression analysis for single cell RNA-seq data using Seurat.
 
 ## Installation
 
-You can install the development version of pseuDE2 like so:
+You can install pseuDE2 using the following devtools command:
 
 ``` r
 devtools::install_github("bioinf-hema-emc/pseuDE2")
